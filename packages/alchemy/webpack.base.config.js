@@ -8,7 +8,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const basePath = process.cwd();
 
-const resolve = (pat) => path.resolve(basePath, pat)
+const resolve = (pat) => path.resolve(basePath, pat);
 
 module.exports = {
   devtool: "eval",
@@ -30,17 +30,28 @@ module.exports = {
       pages: resolve("src/pages"),
       src: resolve("src"),
       "ipfs-api": "ipfs-api/dist",
-      "bn.js": "bn.js/lib/bn.js"
-    }
+      "bn.js": "bn.js/lib/bn.js",
+    },
   },
 
   module: {
     rules: [
+      {
+        test: /(string-scanner\.js)|(logger\.js)$/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: [["@babel/preset-env", { targets: { ie: "11" } }]],
+            plugins: ["@babel/plugin-syntax-dynamic-import"],
+          },
+        },
+      },
+
       // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
       {
         test: /\.tsx?$/,
         loader: ["react-hot-loader/webpack", "awesome-typescript-loader"],
-        exclude: [/node_modules/, /\.spec\.ts$/]
+        exclude: [/node_modules/, /\.spec\.ts$/],
       },
 
       // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
@@ -65,8 +76,8 @@ module.exports = {
           resolve("node_modules/subscriptions-transport-ws"),
           resolve("node_modules/web3-provider"),
           resolve("node_modules/xhr2-cookies"),
-          resolve("node_modules/zen-observable-ts")
-        ]
+          resolve("node_modules/zen-observable-ts"),
+        ],
       },
 
       // This handle the CSS coming from dao creator
@@ -75,9 +86,9 @@ module.exports = {
         include: [
           resolve("node_modules/@fortawesome/fontawesome-free/css/all.min.css"),
           resolve("node_modules/mdbreact/dist/css/mdb.css"),
-          resolve("node_modules/@dorgtech/daocreator-ui/dist")
+          resolve("node_modules/@dorgtech/daocreator-ui/dist"),
         ],
-        use: [MiniCssExtractPlugin.loader, "css-loader"]
+        use: [MiniCssExtractPlugin.loader, "css-loader"],
       },
 
       // CSS handling
@@ -96,10 +107,10 @@ module.exports = {
               minimize: isProd,
               modules: true,
               namedExport: true,
-              sourceMap: true
-            }
-          }
-        ]
+              sourceMap: true,
+            },
+          },
+        ],
       },
 
       // Images & fonts
@@ -107,18 +118,18 @@ module.exports = {
         test: /\.(png|jpg|gif|mp4|ogg|svg|woff|woff2|ttf|eot|ico)$/,
         loader: "url-loader",
         options: {
-          limit: 10000 // For assets smaller than 10k inline them as data urls, otherwise use regular file loader
-        }
-      }
-    ]
+          limit: 10000, // For assets smaller than 10k inline them as data urls, otherwise use regular file loader
+        },
+      },
+    ],
   },
 
   plugins: [
     new HtmlWebpackPlugin({
-      template: "src/index.html"
+      template: "src/index.html",
     }),
     new webpack.DefinePlugin({
-      PACKAGE_VERSION: JSON.stringify(require("./package.json").version)
+      PACKAGE_VERSION: JSON.stringify(require("./package.json").version),
     }),
     new webpack.EnvironmentPlugin({
       ALCHEMY_V1_URL_XDAI: "https://v1.xdai.alchemy.do",
@@ -127,11 +138,11 @@ module.exports = {
       ALCHEMY_V2_URL_MAINNET: "https://alchemy.do",
     }),
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
-    new MiniCssExtractPlugin()
+    new MiniCssExtractPlugin(),
   ],
   node: {
     fs: "empty",
     net: "empty",
-    tls: "empty"
-  }
+    tls: "empty",
+  },
 };

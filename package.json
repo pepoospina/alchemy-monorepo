@@ -6,9 +6,9 @@
   "private": true,
   "scripts": {
     "lerna": "lerna",
-    "build": "lerna bootstrap",
+    "bootstrap": "lerna bootstrap",
     "heroku-postbuild": "npm ci && lerna bootstrap --ci && lerna run 'build' --stream && rm -rf packages/arc.js/node_modules",
-    "build2": "lerna bootstrap && lerna run 'build'",
+    "build": "lerna run 'build'",
     "build:watch": "lerna run 'build:watch'"
   },
   "engines": {

@@ -1,17 +1,32 @@
-
 import * as React from "react";
 import { connect } from "react-redux";
 import { IProposalType, ISchemeState } from "@daostack/arc.js";
 import { enableWalletProvider } from "arc";
-import { ErrorMessage, Field, FieldArray, Form, Formik, FormikErrors, FormikProps, FormikTouched } from "formik";
-import * as classNames from "classnames";
+import {
+  ErrorMessage,
+  Field,
+  FieldArray,
+  Form,
+  Formik,
+  FormikErrors,
+  FormikProps,
+  FormikTouched,
+} from "formik";
+import classNames from "classnames";
 import Interweave from "interweave";
 import { Action, ActionField, GenericSchemeInfo } from "genericSchemeRegistry";
 import { IRootState } from "@store";
-import { NotificationStatus, showNotification } from "@store/notifications/notifications.reducer";
+import {
+  NotificationStatus,
+  showNotification,
+} from "@store/notifications/notifications.reducer";
 import * as arcActions from "@store/arc/arcActions";
 import Analytics from "lib/analytics";
-import { isValidUrl, getArcByDAOAddress, getNetworkByDAOAddress } from "lib/util";
+import {
+  isValidUrl,
+  getArcByDAOAddress,
+  getNetworkByDAOAddress,
+} from "lib/util";
 import { exportUrl, importUrlValues } from "lib/proposalUtils";
 import TagsSelector from "components/Proposal/Create/SchemeForms/TagsSelector";
 import * as css from "components/Proposal/Create/CreateProposal.scss";
@@ -57,7 +72,6 @@ interface IState {
 }
 
 class CreateKnownSchemeProposal extends React.Component<IProps, IState> {
-
   initialFormValues: IFormValues;
 
   constructor(props: IProps) {
@@ -71,7 +85,9 @@ class CreateKnownSchemeProposal extends React.Component<IProps, IState> {
     const initialActionId = this.initialFormValues.currentActionId;
     this.state = {
       actions: props.genericSchemeInfo.actions(),
-      currentAction: initialActionId ? actions.find(action => action.id === initialActionId) : actions[0],
+      currentAction: initialActionId
+        ? actions.find((action) => action.id === initialActionId)
+        : actions[0],
       tags: this.initialFormValues.tags,
     };
   }
@@ -89,10 +105,18 @@ class CreateKnownSchemeProposal extends React.Component<IProps, IState> {
     return ethToSend;
   }
 
-
-  private handleSubmit = async (values: IFormValues, { setSubmitting }: any ): Promise<void> => {
-
-    if (!await enableWalletProvider({ showNotification: this.props.showNotification }, getNetworkByDAOAddress(this.props.daoAvatarAddress))) { return; }
+  private handleSubmit = async (
+    values: IFormValues,
+    { setSubmitting }: any
+  ): Promise<void> => {
+    if (
+      !(await enableWalletProvider(
+        { showNotification: this.props.showNotification },
+        getNetworkByDAOAddress(this.props.daoAvatarAddress)
+      ))
+    ) {
+      return;
+    }
 
     const currentAction = this.state.currentAction;
     const callValues = [];
@@ -105,7 +129,10 @@ class CreateKnownSchemeProposal extends React.Component<IProps, IState> {
 
     let callData = "";
     try {
-      callData = this.props.genericSchemeInfo.encodeABI(currentAction, callValues);
+      callData = this.props.genericSchemeInfo.encodeABI(
+        currentAction,
+        callValues
+      );
     } catch (err) {
       showNotification(NotificationStatus.Failure, err.message);
       setSubmitting(false);
@@ -131,7 +158,10 @@ class CreateKnownSchemeProposal extends React.Component<IProps, IState> {
     };
 
     try {
-      await this.props.createProposal(proposalValues, this.props.daoAvatarAddress);
+      await this.props.createProposal(
+        proposalValues,
+        this.props.daoAvatarAddress
+      );
     } catch (err) {
       showNotification(NotificationStatus.Failure, err.message);
       throw err;
@@ -145,88 +175,110 @@ class CreateKnownSchemeProposal extends React.Component<IProps, IState> {
     });
 
     this.props.handleClose();
-  }
+  };
 
   public handleTabClick = (tab: string) => (_e: any) => {
     this.setState({ currentAction: this.props.genericSchemeInfo.action(tab) });
-  }
+  };
 
-  public renderField(field: ActionField, values: IFormValues, touched: FormikTouched<IFormValues>, errors: FormikErrors<IFormValues>) {
+  public renderField(
+    field: ActionField,
+    values: IFormValues,
+    touched: FormikTouched<IFormValues>,
+    errors: FormikErrors<IFormValues>
+  ) {
     const type = "string";
     switch (field.type) {
       case "bool":
-        return <div className={css.radioButtons}>
-          <Field
-            id={field.name + "_true"}
-            name={field.name}
-            checked={parseInt(values[field.name], 10) === 1}
-            type="radio"
-            value={1}
-          />
-          <label htmlFor={field.name + "_true"}>
-            {field.labelTrue}
-          </label>
+        return (
+          <div className={css.radioButtons}>
+            <Field
+              id={field.name + "_true"}
+              name={field.name}
+              checked={parseInt(values[field.name], 10) === 1}
+              type="radio"
+              value={1}
+            />
+            <label htmlFor={field.name + "_true"}>{field.labelTrue}</label>
 
-          <Field
-            id={field.name + "_false"}
-            name={field.name}
-            checked={parseInt(values[field.name], 10) === 0}
-            type="radio"
-            value={0}
-          />
-          <label htmlFor={field.name + "_false"}>
-            {field.labelFalse}
-          </label>
-        </div>;
+            <Field
+              id={field.name + "_false"}
+              name={field.name}
+              checked={parseInt(values[field.name], 10) === 0}
+              type="radio"
+              value={0}
+            />
+            <label htmlFor={field.name + "_false"}>{field.labelFalse}</label>
+          </div>
+        );
       default:
         if (field.type.includes("[]")) {
           // eslint-disable-next-line react/jsx-no-bind
-          return <FieldArray name={field.name} render={(arrayHelpers) => (
-            <div className={css.arrayFieldContainer}>
-              {values[field.name] && values[field.name].length > 0 ? (
-                values[field.name].map((value: any, index: number) => (
-                  <div key={field.name + "_" + index} className={css.arrayField}>
-                    {this.renderField(
-                      new ActionField({name: `${field.name}.${index}`, type: field.type.slice(0, -2), label: "", placeholder: field.placeholder}),
-                      values,
-                      touched,
-                      errors
-                    )}
-                    <button
-                      className={css.removeItemButton}
-                      type="button"
-                      onClick={() => arrayHelpers.remove(index)} // remove an item from the list
-                    >
-                      -
-                    </button>
-                  </div>
-                ))
-              ) : ""}
-              <button className={css.addItemButton} data-test-id={field.name + ".add"} type="button" onClick={() => arrayHelpers.push("")}>
-                Add {field.label}
-              </button>
-            </div>
-          )}
-          />;
+          return (
+            <FieldArray
+              name={field.name}
+              render={(arrayHelpers) => (
+                <div className={css.arrayFieldContainer}>
+                  {values[field.name] && values[field.name].length > 0
+                    ? values[field.name].map((value: any, index: number) => (
+                        <div
+                          key={field.name + "_" + index}
+                          className={css.arrayField}
+                        >
+                          {this.renderField(
+                            new ActionField({
+                              name: `${field.name}.${index}`,
+                              type: field.type.slice(0, -2),
+                              label: "",
+                              placeholder: field.placeholder,
+                            }),
+                            values,
+                            touched,
+                            errors
+                          )}
+                          <button
+                            className={css.removeItemButton}
+                            type="button"
+                            onClick={() => arrayHelpers.remove(index)} // remove an item from the list
+                          >
+                            -
+                          </button>
+                        </div>
+                      ))
+                    : ""}
+                  <button
+                    className={css.addItemButton}
+                    data-test-id={field.name + ".add"}
+                    type="button"
+                    onClick={() => arrayHelpers.push("")}
+                  >
+                    Add {field.label}
+                  </button>
+                </div>
+              )}
+            />
+          );
         }
         break;
     }
 
-    return <Field
-      id={field.name}
-      data-test-id={field.name}
-      placeholder={field.placeholder}
-      name={field.name}
-      type={type}
-      className={touched[field.name] && errors[field.name] ? css.error : null}
-    />;
+    return (
+      <Field
+        id={field.name}
+        data-test-id={field.name}
+        placeholder={field.placeholder}
+        name={field.name}
+        type={type}
+        className={touched[field.name] && errors[field.name] ? css.error : null}
+      />
+    );
   }
 
   private onTagsChange = (tags: any[]): void => {
-    this.setState({tags});
-  }
+    this.setState({ tags });
+  };
 
-  private setInititialFormValues(){
+  private setInititialFormValues() {
     this.initialFormValues = {
       description: "",
       title: "",
@@ -236,33 +288,37 @@ class CreateKnownSchemeProposal extends React.Component<IProps, IState> {
     };
     const actions = this.props.genericSchemeInfo.actions();
     const daoAvatarAddress = this.props.daoAvatarAddress;
-    actions.forEach((action) => action.getFields().forEach((field: ActionField) => {
-      if (typeof(field.defaultValue) !== "undefined") {
-        if (field.defaultValue === "_avatar") {
-          this.initialFormValues[field.name] = daoAvatarAddress;
+    actions.forEach((action) =>
+      action.getFields().forEach((field: ActionField) => {
+        if (typeof field.defaultValue !== "undefined") {
+          if (field.defaultValue === "_avatar") {
+            this.initialFormValues[field.name] = daoAvatarAddress;
+          } else {
+            this.initialFormValues[field.name] = field.defaultValue;
+          }
         } else {
-          this.initialFormValues[field.name] = field.defaultValue;
+          switch (field.type) {
+            case "uint64":
+            case "uint256":
+            case "bytes32":
+            case "bytes":
+            case "address":
+            case "string":
+              this.initialFormValues[field.name] = "";
+              break;
+            case "bool":
+              this.initialFormValues[field.name] = 0;
+              break;
+            case "address[]":
+              this.initialFormValues[field.name] = [""];
+              break;
+          }
         }
-      } else {
-        switch (field.type) {
-          case "uint64":
-          case "uint256":
-          case "bytes32":
-          case "bytes":
-          case "address":
-          case "string":
-            this.initialFormValues[field.name] = "";
-            break;
-          case "bool":
-            this.initialFormValues[field.name] = 0;
-            break;
-          case "address[]":
-            this.initialFormValues[field.name] = [""];
-            break;
-        }
-      }
-    }));
-    this.initialFormValues = importUrlValues<IFormValues>(this.initialFormValues);
+      })
+    );
+    this.initialFormValues = importUrlValues<IFormValues>(
+      this.initialFormValues
+    );
   }
   public exportFormValues(values: IFormValues) {
     values = {
@@ -271,7 +327,10 @@ class CreateKnownSchemeProposal extends React.Component<IProps, IState> {
       ...this.state,
     };
     exportUrl(values);
-    this.props.showNotification(NotificationStatus.Success, "Exportable url is now in clipboard :)");
+    this.props.showNotification(
+      NotificationStatus.Success,
+      "Exportable url is now in clipboard :)"
+    );
   }
 
   public render(): RenderOutput {
@@ -284,7 +343,7 @@ class CreateKnownSchemeProposal extends React.Component<IProps, IState> {
     return (
       <div className={css.containerWithSidebar}>
         <div className={css.sidebar}>
-          { actions.map((action) =>
+          {actions.map((action) => (
             <button
               data-test-id={"action-tab-" + action.id}
               key={action.id}
@@ -292,11 +351,12 @@ class CreateKnownSchemeProposal extends React.Component<IProps, IState> {
                 [css.tab]: true,
                 [css.selected]: currentAction.id === action.id,
               })}
-              onClick={this.handleTabClick(action.id)}>
+              onClick={this.handleTabClick(action.id)}
+            >
               <span></span>
-              { action.label }
+              {action.label}
             </button>
-          )}
+          ))}
         </div>
 
         <div className={css.contentWrapper}>
@@ -390,8 +450,10 @@ class CreateKnownSchemeProposal extends React.Component<IProps, IState> {
                   </div>
                   <label htmlFor="titleInput">
                     <div className={css.requiredMarker}>*</div>
-                      Title
-                    <ErrorMessage name="title">{(msg) => <span className={css.errorMessage}>{msg}</span>}</ErrorMessage>
+                    Title
+                    <ErrorMessage name="title">
+                      {(msg) => <span className={css.errorMessage}>{msg}</span>}
+                    </ErrorMessage>
                   </label>
                   <Field
                     autoFocus
@@ -406,31 +468,46 @@ class CreateKnownSchemeProposal extends React.Component<IProps, IState> {
                   <label htmlFor="descriptionInput">
                     <div className={css.proposalDescriptionLabelText}>
                       <div className={css.requiredMarker}>*</div>
-                      <div className={css.body}>Description</div><HelpButton text={HelpButton.helpTextProposalDescription} />
+                      <div className={css.body}>Description</div>
+                      <HelpButton
+                        text={HelpButton.helpTextProposalDescription}
+                      />
                     </div>
-                    <ErrorMessage name="description">{(msg) => <span className={css.errorMessage}>{msg}</span>}</ErrorMessage>
+                    <ErrorMessage name="description">
+                      {(msg) => <span className={css.errorMessage}>{msg}</span>}
+                    </ErrorMessage>
                   </label>
 
                   <Field
                     component={MarkdownField}
-                    onChange={(value: any) => { setFieldValue("description", value); }}
+                    onChange={(value: any) => {
+                      setFieldValue("description", value);
+                    }}
                     id="descriptionInput"
                     placeholder="Describe your proposal in greater detail"
                     name="description"
-                    className={touched.description && errors.description ? css.error : null}
+                    className={
+                      touched.description && errors.description
+                        ? css.error
+                        : null
+                    }
                   />
 
-                  <label className={css.tagSelectorLabel}>
-                    Tags
-                  </label>
+                  <label className={css.tagSelectorLabel}>Tags</label>
 
                   <div className={css.tagSelectorContainer}>
-                    <TagsSelector onChange={this.onTagsChange} tags={this.state.tags} arc={arc}></TagsSelector>
+                    <TagsSelector
+                      onChange={this.onTagsChange}
+                      tags={this.state.tags}
+                      arc={arc}
+                    ></TagsSelector>
                   </div>
 
                   <label htmlFor="urlInput">
                     URL
-                    <ErrorMessage name="url">{(msg) => <span className={css.errorMessage}>{msg}</span>}</ErrorMessage>
+                    <ErrorMessage name="url">
+                      {(msg) => <span className={css.errorMessage}>{msg}</span>}
+                    </ErrorMessage>
                   </label>
                   <Field
                     id="urlInput"
@@ -441,35 +518,59 @@ class CreateKnownSchemeProposal extends React.Component<IProps, IState> {
                     className={touched.url && errors.url ? css.error : null}
                   />
 
-                  <div key={currentAction.id}
+                  <div
+                    key={currentAction.id}
                     className={classNames({
                       [css.tab]: true,
-                      [css.selected]: this.state.currentAction.id === currentAction.id,
-                    })
-                    }
+                      [css.selected]:
+                        this.state.currentAction.id === currentAction.id,
+                    })}
                   >
-                    {
-                      currentAction.getFields().map((field: ActionField) => {
-                        return (
-                          <div key={field.name}>
-                            <label htmlFor={field.name}>
-                              {field.type !== "bool" && !field.optional ? <div className={css.requiredMarker}>*</div> : ""}
-                              { field.label }
-                              <ErrorMessage name={field.name}>{(msg) => <span className={css.errorMessage}>{msg}</span>}</ErrorMessage>
-                            </label>
-                            {this.renderField(field, values, touched, errors)}
-                          </div>
-                        );
-                      })
-                    }
+                    {currentAction.getFields().map((field: ActionField) => {
+                      return (
+                        <div key={field.name}>
+                          <label htmlFor={field.name}>
+                            {field.type !== "bool" && !field.optional ? (
+                              <div className={css.requiredMarker}>*</div>
+                            ) : (
+                              ""
+                            )}
+                            {field.label}
+                            <ErrorMessage name={field.name}>
+                              {(msg) => (
+                                <span className={css.errorMessage}>{msg}</span>
+                              )}
+                            </ErrorMessage>
+                          </label>
+                          {this.renderField(field, values, touched, errors)}
+                        </div>
+                      );
+                    })}
                   </div>
 
                   <div className={css.createProposalActions}>
-                    <button id="export-proposal" className={css.exportProposal} type="button" onClick={() => this.exportFormValues(values)}>
+                    <button
+                      id="export-proposal"
+                      className={css.exportProposal}
+                      type="button"
+                      onClick={() => this.exportFormValues(values)}
+                    >
                       <img src="/assets/images/Icon/share-blue.svg" />
                     </button>
-                    <button className={css.exitProposalCreation} type="button" onClick={handleClose}>Cancel</button>
-                    <button className={css.submitProposal} type="submit" disabled={isSubmitting}>Submit proposal</button>
+                    <button
+                      className={css.exitProposalCreation}
+                      type="button"
+                      onClick={handleClose}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className={css.submitProposal}
+                      type="submit"
+                      disabled={isSubmitting}
+                    >
+                      Submit proposal
+                    </button>
                   </div>
                 </Form>
               );
@@ -481,4 +582,7 @@ class CreateKnownSchemeProposal extends React.Component<IProps, IState> {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(CreateKnownSchemeProposal);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(CreateKnownSchemeProposal);

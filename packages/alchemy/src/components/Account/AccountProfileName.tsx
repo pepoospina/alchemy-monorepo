@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import { IProfileState } from "@store/profiles/profilesReducer";
 
-import * as classNames from "classnames";
+import classNames from "classnames";
 
 import * as css from "./Account.scss";
 
@@ -16,9 +16,14 @@ interface IProps {
 }
 
 export default class AccountProfileName extends React.Component<IProps, null> {
-
   public render(): RenderOutput {
-    const { accountAddress, accountProfile, daoAvatarAddress, historyView, detailView } = this.props;
+    const {
+      accountAddress,
+      accountProfile,
+      daoAvatarAddress,
+      historyView,
+      detailView,
+    } = this.props;
 
     const accountNameClass = classNames({
       [css.accountName]: true,
@@ -27,8 +32,18 @@ export default class AccountProfileName extends React.Component<IProps, null> {
     });
 
     return (
-      <Link title={accountProfile && accountProfile.name} className={accountNameClass} to={"/profile/" + accountAddress + (daoAvatarAddress ? "?daoAvatarAddress=" + daoAvatarAddress : "")}>
-        {accountProfile && accountProfile.name ? accountProfile.name : accountAddress.substr(0, 8) + "..."}
+      <Link
+        title={accountProfile && accountProfile.name}
+        className={accountNameClass}
+        to={
+          "/profile/" +
+          accountAddress +
+          (daoAvatarAddress ? "?daoAvatarAddress=" + daoAvatarAddress : "")
+        }
+      >
+        {accountProfile && accountProfile.name
+          ? accountProfile.name
+          : accountAddress.substr(0, 8) + "..."}
       </Link>
     );
   }

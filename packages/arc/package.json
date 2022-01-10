@@ -19,7 +19,8 @@
     "lint --fix": "eslint --fix .",
     "coveralls": "hardhat coverage && cat coverage/lcov.info | coveralls",
     "extractabis": "node scripts/extract-abis.js",
-    "test-ci": "./test-ci.sh"
+    "test-ci": "./test-ci.sh",
+    "build": "hardhat compile"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",

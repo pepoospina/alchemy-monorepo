@@ -1,5 +1,9 @@
-import { IProposalOutcome, IProposalStage, IProposalState } from "@daostack/arc.js";
-import * as classNames from "classnames";
+import {
+  IProposalOutcome,
+  IProposalStage,
+  IProposalState,
+} from "@daostack/arc.js";
+import classNames from "classnames";
 import * as React from "react";
 import { closingTime } from "lib/proposalHelpers";
 
@@ -14,8 +18,7 @@ interface IProps {
   onEnd?(): any;
 }
 
-interface IState extends ICountdown {
-}
+interface IState extends ICountdown {}
 
 export default class ProposalCountdown extends React.Component<IProps, IState> {
   public interval: any;
@@ -29,7 +32,9 @@ export default class ProposalCountdown extends React.Component<IProps, IState> {
   public componentDidMount() {
     // update every five seconds
     this.interval = setInterval(() => {
-      const countdownState = calculateCountdown(closingTime(this.props.proposal, this.props.proposalsPage));
+      const countdownState = calculateCountdown(
+        closingTime(this.props.proposal, this.props.proposalsPage)
+      );
       this.setState(countdownState);
 
       if (countdownState.complete) {
@@ -86,34 +91,66 @@ export default class ProposalCountdown extends React.Component<IProps, IState> {
     return (
       <div className={containerClass}>
         <div className={css.percentageContainer}>
-          <div style={{ backgroundColor: "blue", height: "2px", width: percentageComplete + "%" }}></div>
+          <div
+            style={{
+              backgroundColor: "blue",
+              height: "2px",
+              width: percentageComplete + "%",
+            }}
+          ></div>
         </div>
-        {this.props.detailView ?
+        {this.props.detailView ? (
           <span className={css.label}>
-            { proposal.stage === IProposalStage.Queued ? "Proposal will expire in" :
-              proposal.stage === IProposalStage.PreBoosted && proposal.downStakeNeededToQueue.lten(0) ? "Proposal will un-boost in" :
-                proposal.stage === IProposalStage.PreBoosted ? "Proposal will boost in" :
-                  (proposal.stage === IProposalStage.Boosted || proposal.stage === IProposalStage.QuietEndingPeriod) && proposal.winningOutcome === IProposalOutcome.Pass ? "Proposal will pass in" :
-                    (proposal.stage === IProposalStage.Boosted || proposal.stage === IProposalStage.QuietEndingPeriod) ? "Proposal will fail in" :
-                      ""
-            }
+            {proposal.stage === IProposalStage.Queued
+              ? "Proposal will expire in"
+              : proposal.stage === IProposalStage.PreBoosted &&
+                proposal.downStakeNeededToQueue.lten(0)
+              ? "Proposal will un-boost in"
+              : proposal.stage === IProposalStage.PreBoosted
+              ? "Proposal will boost in"
+              : (proposal.stage === IProposalStage.Boosted ||
+                  proposal.stage === IProposalStage.QuietEndingPeriod) &&
+                proposal.winningOutcome === IProposalOutcome.Pass
+              ? "Proposal will pass in"
+              : proposal.stage === IProposalStage.Boosted ||
+                proposal.stage === IProposalStage.QuietEndingPeriod
+              ? "Proposal will fail in"
+              : ""}
           </span>
-          : " "
-        }
-        {
-          countDown.days ? <span className={css.timeSection}><strong>{this.addLeadingZeros(countDown.days)}d</strong><span className={css.colon}>:</span></span> : ""
-        }
-        <span className={css.timeSection}><strong>{this.addLeadingZeros(countDown.hours)}h</strong><span className={css.colon}>:</span></span>
-        <span className={css.timeSection}><strong>{this.addLeadingZeros(countDown.min)}m</strong></span>
-        {
-          countDown.days ? "" : <span className={css.timeSection}><span className={css.colon}>:</span><strong>{this.addLeadingZeros(countDown.seconds)}s</strong></span>
-        }
-        {proposal.stage === IProposalStage.QuietEndingPeriod && !countDown.complete ?
+        ) : (
+          " "
+        )}
+        {countDown.days ? (
+          <span className={css.timeSection}>
+            <strong>{this.addLeadingZeros(countDown.days)}d</strong>
+            <span className={css.colon}>:</span>
+          </span>
+        ) : (
+          ""
+        )}
+        <span className={css.timeSection}>
+          <strong>{this.addLeadingZeros(countDown.hours)}h</strong>
+          <span className={css.colon}>:</span>
+        </span>
+        <span className={css.timeSection}>
+          <strong>{this.addLeadingZeros(countDown.min)}m</strong>
+        </span>
+        {countDown.days ? (
+          ""
+        ) : (
+          <span className={css.timeSection}>
+            <span className={css.colon}>:</span>
+            <strong>{this.addLeadingZeros(countDown.seconds)}s</strong>
+          </span>
+        )}
+        {proposal.stage === IProposalStage.QuietEndingPeriod &&
+        !countDown.complete ? (
           <strong className={css.overTime}>
             <img src="/assets/images/Icon/Overtime.svg" /> OVERTIME
           </strong>
-          : " "
-        }
+        ) : (
+          " "
+        )}
       </div>
     );
   }

@@ -18,7 +18,8 @@
     "lint": "eslint .",
     "lint --fix": "eslint --fix .",
     "coveralls": "buidler coverage && cat coverage/lcov.info | coveralls",
-    "test-ci": "./test-ci.sh"
+    "test-ci": "./test-ci.sh",
+    "build": "buidler compile"
   },
   "devDependencies": {
     "@nomiclabs/buidler": "^1.4.8",

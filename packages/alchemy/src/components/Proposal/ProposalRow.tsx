@@ -4,7 +4,7 @@ import { calculateProposalStatus, IProposalStatus } from "lib/proposalHelpers";
 import { schemeName } from "lib/schemeUtils";
 import * as React from "react";
 import * as css from "./ProposalRow.scss";
-import * as classNames from "classnames";
+import classNames from "classnames";
 
 interface IProps {
   data: Proposal;
@@ -12,12 +12,20 @@ interface IProps {
 }
 
 const ProposalRow = (props: IProps) => {
-  const { id, dao, scheme, title, tags, boostedAt } = props.data.staticState as IProposalState;
+  const { id, dao, scheme, title, tags, boostedAt } = props.data
+    .staticState as IProposalState;
   const tagsLables = tags.map((tag, index) => {
-    return <div key={index} className={css.tag}>{(tag as any).id}</div>;
+    return (
+      <div key={index} className={css.tag}>
+        {(tag as any).id}
+      </div>
+    );
   });
-  const status = calculateProposalStatus(props.data.staticState as IProposalState);
-  const showCountdown = status === IProposalStatus.Passing || status === IProposalStatus.Failing;
+  const status = calculateProposalStatus(
+    props.data.staticState as IProposalState
+  );
+  const showCountdown =
+    status === IProposalStatus.Passing || status === IProposalStatus.Failing;
 
   const statusLabelClass = classNames({
     [css.statusLabel]: true,
@@ -26,16 +34,40 @@ const ProposalRow = (props: IProps) => {
   });
 
   return (
-    <tr className={css.row} onClick={() => window.open(`/dao/${dao.id}/proposal/${id}`)}>
+    <tr
+      className={css.row}
+      onClick={() => window.open(`/dao/${dao.id}/proposal/${id}`)}
+    >
       <td className={css.titleWrapper}>
-        <div className={css.title} title={title}>{title}</div>
-        {tagsLables.length > 0 && <div className={css.tagsWrapper}>{tagsLables}</div>}
+        <div className={css.title} title={title}>
+          {title}
+        </div>
+        {tagsLables.length > 0 && (
+          <div className={css.tagsWrapper}>{tagsLables}</div>
+        )}
       </td>
       <td>{schemeName(scheme) ?? "Unknown"}</td>
-      <td>{boostedAt && (status === IProposalStatus.Passing || status === IProposalStatus.Failing) && <div className={css.boostedWrapper}><img width="12px" src="/assets/images/Icon/boosted.svg" /> <span className={css.boostedLabel}>Boosted</span></div>}</td>
+      <td>
+        {boostedAt &&
+          (status === IProposalStatus.Passing ||
+            status === IProposalStatus.Failing) && (
+            <div className={css.boostedWrapper}>
+              <img width="12px" src="/assets/images/Icon/boosted.svg" />{" "}
+              <span className={css.boostedLabel}>Boosted</span>
+            </div>
+          )}
+      </td>
       <td className={css.statusWrapper}>
         <div className={statusLabelClass}>{status}</div>
-        {showCountdown && <div className={css.statusTime}><ProposalCountdown proposal={props.data.staticState as IProposalState} schemeView proposalsPage /></div>}
+        {showCountdown && (
+          <div className={css.statusTime}>
+            <ProposalCountdown
+              proposal={props.data.staticState as IProposalState}
+              schemeView
+              proposalsPage
+            />
+          </div>
+        )}
       </td>
     </tr>
   );
